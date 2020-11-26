@@ -1,6 +1,6 @@
 # Load all relevant packages
 using CPLEX, CSV, DataFrames, Distributed, OffsetArrays, Random, Statistics
-nworkers() == 8 || addprocs(8, exeflags="--project") 
+nworkers() == 4 || addprocs(4, exeflags="--project") 
 @everywhere using BLOPimpute, CPLEX
 
 # Simulate a sample of size N from the DGP determined by (d, l, σ)
@@ -61,10 +61,11 @@ df =
     DataFrame((θs[i]..., means[i], ŷbs[i]...) for i ∈ 1:length(θs)) |>
     x -> rename!(x, [:N, :d, :l, :o, :r, :target, Symbol.(1:Smax)...]) |>
     x -> stack(x, 7:(6 + Smax), value_name = :estimate, variable_name = :S)
+mkpath("data")
 CSV.write("data/exp-01.csv", df)
 
 # Export the results to google cloud storage
 run(`gsutil cp data/exp-01.csv gs://rivera2021-db/exp-01.csv`)
 
 # Stop google cloud vm instance
-run(`gcloud compute instances stop rivera2021 --zone us-central1-a`)
+run(`gcloud compute instances stop rivera2021-vm --zone us-central1-a`)
