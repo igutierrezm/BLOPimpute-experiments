@@ -60,7 +60,7 @@ end
 pmap(model -> foo(model, 11), models[1:2]); # for jit compilation
 
 # XXX
-Smax = 12
+Smax = 50
 ŷbs = pmap(model -> foo(model, Smax), models);
 
 # Save the results
