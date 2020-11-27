@@ -37,4 +37,4 @@ julia src/exp-01.jl
 gsutil cp data/exp-01.csv gs://rivera2021-db/exp-01.csv
 
 # Delete the vm
-gcloud compute instances delete rivera2021-vm --zone us-central1-a
+gcloud compute instances delete rivera2021-vm --zone us-central1-a --quiet
