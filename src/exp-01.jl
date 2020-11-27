@@ -29,7 +29,7 @@ function generate_model(sample)
 end
 
 # Compute all combinations of the form θ = (N, d, l, σ, r), r => sample id
-Ns = [1, 2] * 100;
+Ns = [1, 2] * 1000;
 ls = [0.5, 1, 2, 3];
 σs = [1, √2];
 rs = 1:10
