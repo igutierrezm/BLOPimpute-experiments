@@ -1,4 +1,7 @@
 # Load all relevant packages
+using Pkg
+Pkg.activate(".")
+Pkg.instantiate()
 using BenchmarkTools, BLOPimpute, CPLEX, CSV, DataFrames
 using OffsetArrays, Random, Statistics
 1+1

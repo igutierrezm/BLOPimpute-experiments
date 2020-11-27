@@ -1,4 +1,7 @@
 # Load all relevant packages
+using Pkg
+Pkg.activate(".")
+Pkg.instantiate()
 using CPLEX, CSV, DataFrames, Distributed, OffsetArrays, Random, Statistics
 nworkers() == 4 || addprocs(4, exeflags="--project") 
 @everywhere using BLOPimpute, CPLEX
