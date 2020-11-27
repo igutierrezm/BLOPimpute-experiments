@@ -32,7 +32,7 @@ end
 Ns = [1, 2] * 1000;
 ls = [0.5, 1, 2, 3];
 σs = [1, √2];
-rs = 1:10
+rs = 1:400
 ds = 1:5;
 θs = collect(Iterators.product(Ns, ds, ls, σs, rs))[:];
 
