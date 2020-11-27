@@ -3,7 +3,7 @@ using Pkg
 Pkg.activate(".")
 Pkg.instantiate()
 using CPLEX, CSV, DataFrames, Distributed, OffsetArrays, Random, Statistics
-nworkers() == 4 || addprocs(4, exeflags="--project") 
+nworkers() == 8 || addprocs(8, exeflags="--project") 
 @everywhere using BLOPimpute, CPLEX
 
 # Simulate a sample of size N from the DGP determined by (d, l, σ)
