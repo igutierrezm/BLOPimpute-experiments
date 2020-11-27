@@ -43,10 +43,14 @@ means   = [mean(x[1][0])     for x ∈ samples];     # compute the sample mean
 
 # Impute ȳ for each variant, for a given sample and `S`
 @everywhere function foo(model, Smax)
-    ŷb = -ones(Smax)
+    ŷb = zeros(Smax)
     for S ∈ (size(model.X[1], 1) + 1):Smax
-        model.S̄[1] = S
-        ŷb[S] = mean(impute!(model))
+        try
+            model.S̄[1] = S
+            ŷb[S] = mean(impute!(model))
+        catch
+            ŷb[S] = Inf
+        end
     end
     return ŷb
 end
@@ -61,11 +65,4 @@ df =
     DataFrame((θs[i]..., means[i], ŷbs[i]...) for i ∈ 1:length(θs)) |>
     x -> rename!(x, [:N, :d, :l, :o, :r, :target, Symbol.(1:Smax)...]) |>
     x -> stack(x, 7:(6 + Smax), value_name = :estimate, variable_name = :S)
-mkpath("data")
 CSV.write("data/exp-01.csv", df)
-
-# Export the results to google cloud storage
-run(`gsutil cp data/exp-01.csv gs://rivera2021-db/exp-01.csv`)
-
-# Stop google cloud vm instance
-run(`gcloud compute instances stop rivera2021-vm --zone us-central1-a`)
