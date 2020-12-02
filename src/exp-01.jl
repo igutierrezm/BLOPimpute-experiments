@@ -2,9 +2,9 @@
 using Pkg
 Pkg.activate(".")
 Pkg.instantiate()
-using CPLEX, CSV, DataFrames, Distributed, OffsetArrays, Random, Statistics
-nworkers() == 8 || addprocs(8, exeflags="--project") 
-@everywhere using BLOPimpute, CPLEX
+using CPLEX, CSV, DataFrames, Distributed, OffsetArrays, Random, DataFramesMeta
+nworkers() == 8 || addprocs(8, exeflags = "--project")
+@everywhere using BLOPimpute, CPLEX, NearestNeighbors
 
 # Simulate a sample of size N from the DGP determined by (d, l, σ)
 function simulate_sample(N, d, l, σ)
@@ -32,7 +32,7 @@ end
 Ns = [1, 2] * 1000;
 ls = [0.5, 1, 2, 3];
 σs = [1, √2];
-rs = 1:400
+rs = 1:400;
 ds = 1:5;
 θs = collect(Iterators.product(Ns, ds, ls, σs, rs))[:];
 
@@ -44,8 +44,25 @@ samples = [simulate_sample(x[1:4]...) for x ∈ θs]; # create a sample
 models  = [generate_model(x) for x ∈ samples];     # create a model
 means   = [mean(x[1][0])     for x ∈ samples];     # compute the sample mean
 
-# Impute ȳ for each variant, for a given sample and `S`
-@everywhere function foo(model, Smax)
+# Impute ȳ for each `S`, given a model (knn)
+@everywhere function ȳknn(model, Smax)
+    y = model.y
+    X = model.X
+    ŷb = zeros(Smax)
+    kdtree = KDTree(X[1]; leafsize = 100)
+    for S ∈ (size(X[1], 1) + 1):Smax
+        for i ∈ 1:length(y[0])
+            ν = knn(kdtree, X[0][:, i], S)[1]
+            y[0][i] = mean(y[1][ν])
+        end
+        ŷb[S] = mean([y[0]; y[1]])
+    end
+    return ŷb
+end
+ȳknn(models[1], 11); # for jit compilation
+
+# Impute ȳ for each `S`, given a model (blop)
+@everywhere function ȳblop(model, Smax)
     ŷb = zeros(Smax)
     for S ∈ (size(model.X[1], 1) + 1):Smax
         try
@@ -57,15 +74,30 @@ means   = [mean(x[1][0])     for x ∈ samples];     # compute the sample mean
     end
     return ŷb
 end
-pmap(model -> foo(model, 11), models[1:2]); # for jit compilation
+ȳblop(models[1], 11); # for jit compilation
 
-# XXX
-Smax = 50
-ŷbs = pmap(model -> foo(model, Smax), models);
+# Run the experiments
+Smax = 50;
+ȳh = Dict(
+    :knn => pmap(model -> ȳknn(model, Smax), models),
+    :blop => pmap(model -> ȳblop(model, Smax), models)
+);
 
-# Save the results
-df = 
-    DataFrame((θs[i]..., means[i], ŷbs[i]...) for i ∈ 1:length(θs)) |>
-    x -> rename!(x, [:N, :d, :l, :o, :r, :target, Symbol.(1:Smax)...]) |>
-    x -> stack(x, 7:(6 + Smax), value_name = :estimate, variable_name = :S)
-CSV.write("data/exp-01.csv", df)
+# Arrange the results as dataframes
+# df = map([:knn, :blop]) do m
+df = map([:knn]) do m
+    DataFrame((θs[i]..., m, means[i], ȳh[m][i]...) for i ∈ 1:length(θs)) |>
+    x -> rename!(x, [:N, :d, :l, :o, :r, :m, :target, Symbol.(1:Smax)...]) |>
+    x -> stack(x, 8:(7 + Smax), value_name = :estimate, variable_name = :S) |>
+    x -> select!(x, All(Not("target"), :)) |>
+    x -> @linq x |>
+    transform(S = levelcode.(:S)) |>
+    where(
+        ((:d .== 1) .& (:S .>  2)) .|
+        ((:d .== 2) .& (:S .>  4)) .|
+        ((:d .== 3) .& (:S .>  6)) .|
+        ((:d .== 4) .& (:S .> 10)) .|
+        ((:d .== 5) .& (:S .>  2))
+    )
+end;
+CSV.write("data/exp-01.csv", vcat(df...))
