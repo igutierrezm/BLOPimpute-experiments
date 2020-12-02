@@ -42,16 +42,17 @@ Random.seed!(1);
 # For each θ, ...
 samples = [simulate_sample(x[1:4]...) for x ∈ θs]; # create a sample
 models  = [generate_model(x) for x ∈ samples];     # create a model
-means   = [mean(x[1][0])     for x ∈ samples];     # compute the sample mean
+means   = [mean(x[1][0])     for x ∈ samples];     # save the true means
 
 # Impute ȳ for each `S` <= `Smax`, given a model (knn)
 @everywhere function ȳknn(model, Smax)
     y = model.y
     X = model.X
     ŷb = zeros(Smax)
+    K, N0 = size(X[1])
     kdtree = KDTree(X[1]; leafsize = 100)
-    for S ∈ (size(X[1], 1) + 1):Smax
-        for i ∈ 1:length(y[0])
+    for S ∈ K+1:Smax
+        for i ∈ 1:N0
             ν = knn(kdtree, X[0][:, i], S)[1]
             y[0][i] = mean(y[1][ν])
         end
@@ -85,7 +86,7 @@ ȳh = Dict(
 
 # Arrange the results as dataframes
 df = map([:knn, :blop]) do m
-    DataFrame((θs[i]..., m, means[i], ȳh[m][i]...) for i ∈ 1:length(θs)) |>
+    DataFrame((θs[i]..., m, ȳt[i], ȳh[m][i]...) for i ∈ 1:length(θs)) |>
     x -> rename!(x, [:N, :d, :l, :o, :r, :m, :target, Symbol.(1:Smax)...]) |>
     x -> stack(x, 8:(7 + Smax), value_name = :estimate, variable_name = :S) |>
     x -> select!(x, All(Not("target"), :)) |>
