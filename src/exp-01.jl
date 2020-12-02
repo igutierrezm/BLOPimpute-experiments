@@ -44,7 +44,7 @@ samples = [simulate_sample(x[1:4]...) for x ∈ θs]; # create a sample
 models  = [generate_model(x) for x ∈ samples];     # create a model
 means   = [mean(x[1][0])     for x ∈ samples];     # compute the sample mean
 
-# Impute ȳ for each `S`, given a model (knn)
+# Impute ȳ for each `S` <= `Smax`, given a model (knn)
 @everywhere function ȳknn(model, Smax)
     y = model.y
     X = model.X
@@ -61,7 +61,7 @@ means   = [mean(x[1][0])     for x ∈ samples];     # compute the sample mean
 end
 ȳknn(models[1], 11); # for jit compilation
 
-# Impute ȳ for each `S`, given a model (blop)
+# Impute ȳ for each `S` <= `Smax`, given a model (blop)
 @everywhere function ȳblop(model, Smax)
     ŷb = zeros(Smax)
     for S ∈ (size(model.X[1], 1) + 1):Smax
@@ -84,8 +84,7 @@ ȳh = Dict(
 );
 
 # Arrange the results as dataframes
-# df = map([:knn, :blop]) do m
-df = map([:knn]) do m
+df = map([:knn, :blop]) do m
     DataFrame((θs[i]..., m, means[i], ȳh[m][i]...) for i ∈ 1:length(θs)) |>
     x -> rename!(x, [:N, :d, :l, :o, :r, :m, :target, Symbol.(1:Smax)...]) |>
     x -> stack(x, 8:(7 + Smax), value_name = :estimate, variable_name = :S) |>
