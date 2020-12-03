@@ -8,7 +8,7 @@ CPLEX_GCS_BIN="gs://cplex-1210/cplex-1210.bin" # cplex .bin location
 OUTPUT_GCS_CSV="gs://blopimpute/exp-${ID}.csv" # .csv destination
 # Notes:
 # - The VM must be created in us-central1-a
-# - The CPLEX_GCS_BIN and OUTPUT_GCS_CSV files must be in GCS buckets.
+# - The last two files must be in GCS buckets.
 
 # Install JRE 2:1.11-72
 sudo apt update
@@ -36,7 +36,7 @@ sudo ln -s /opt/julia-1.5.3/bin/julia /usr/local/bin/julia
 sudo apt --assume-yes autoremove -f
 rm -rf julia-1.5.3*
 
-# Run the experiment
+# Run experiment
 git clone https://github.com/igutierrezm/BLOPimpute-experiments.git
 cd BLOPimpute-experiments
 julia data/exp-${ID}.jl
@@ -44,5 +44,5 @@ julia data/exp-${ID}.jl
 # Save results in a bucket
 gsutil cp data/exp-${ID}.csv ${OUTPUT_GCS_CSV}
 
-# Delete the vm
+# Delete VM
 gcloud compute instances delete ${VM_NAME} --zone us-central1-a --quiet
