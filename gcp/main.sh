@@ -1,6 +1,6 @@
 #! /bin/bash
 gcloud beta compute \
-    --project=gcp-test-296413 instances create exp-01 \
+    --project=gcp-test-296413 instances create blopimpute \
     --zone=us-central1-a \
     --machine-type=e2-standard-8 \
     --subnet=default \
@@ -12,7 +12,7 @@ gcloud beta compute \
     --image-project=ubuntu-os-cloud \
     --boot-disk-size=200GB \
     --boot-disk-type=pd-standard \
-    --boot-disk-device-name=exp-01 \
+    --boot-disk-device-name=blopimpute \
     --no-shielded-secure-boot \
     --shielded-vtpm \
     --shielded-integrity-monitoring \

@@ -3,7 +3,7 @@
 
 # User defined parameters
 ID="01"                                        # experiment id
-VM_NAME="exp-${ID}"                            # VM instance name
+VM_NAME="blopimpute"                           # VM instance name
 CPLEX_GCS_BIN="gs://cplex-1210/cplex-1210.bin" # cplex .bin location
 OUTPUT_GCS_CSV="gs://blopimpute/exp-${ID}.csv" # .csv destination
 # Notes:
@@ -41,7 +41,7 @@ git clone https://github.com/igutierrezm/BLOPimpute-experiments.git
 cd BLOPimpute-experiments
 julia data/exp-${ID}.jl
 
-# Save results in a bucket
+# Save results
 gsutil cp data/exp-${ID}.csv ${OUTPUT_GCS_CSV}
 
 # Delete VM
