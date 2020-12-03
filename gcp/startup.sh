@@ -1,21 +1,13 @@
 #! /bin/bash
-# A startup file for running any file in data/ using GOOGLE COMPUTE ENGINE
-
-# User defined parameters
-ID="01"                                        # experiment id
-VM_NAME="blopimpute"                           # VM instance name
-CPLEX_GCS_BIN="gs://cplex-1210/cplex-1210.bin" # cplex .bin location
-OUTPUT_GCS_CSV="gs://blopimpute/exp-${ID}.csv" # .csv destination
-# Notes:
-# - The VM must be created in us-central1-a
-# - The last two files must be in GCS buckets.
+# Run data/exp-${ID}.jl and save the produced csv file in gs://blopimpute
+ID="01"
 
 # Install JRE 2:1.11-72
 sudo apt update
 sudo apt --assume-yes install default-jre=2:1.11-72
 
 # Install CPLEX 12.10
-gsutil cp ${CPLEX_GCS_BIN} cplex.bin
+gsutil cp gs://cplex-1210/cplex-1210.bin cplex.bin
 chmod +x cplex.bin
 CPLEX_DIR="/opt"
 sudo ./cplex.bin \
@@ -42,7 +34,7 @@ cd BLOPimpute-experiments
 julia data/exp-${ID}.jl
 
 # Save results
-gsutil cp data/exp-${ID}.csv ${OUTPUT_GCS_CSV}
+gsutil cp data/exp-${ID}.csv gs://blopimpute
 
 # Delete VM
-gcloud compute instances delete ${VM_NAME} --zone us-central1-a --quiet
+gcloud compute instances delete blopimpute --zone us-central1-a --quiet
