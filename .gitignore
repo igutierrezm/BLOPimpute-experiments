@@ -1,1 +1,5 @@
 *.csv
+*.rds
+.Rhistory
+.Rproj.user
+.vscode
