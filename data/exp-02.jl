@@ -9,7 +9,7 @@ nworkers() == 8 || addprocs(8, exeflags = "--project")
 # Simulate a sample of size N from the DGP determined by (d, l, σ)
 function simulate_sample(N, d, l, σ)
     K = [2, 4, 6, 10, 2]
-    X = -log.(Random.rand(K[d], N)) # re-evaluate
+    X = Random.randn(K[d], N)
     y = σ * Random.randn(N)
     for j ∈ 1:K[d]
         @. y += X[j, :] * (-1)^(j - 1)
@@ -29,11 +29,11 @@ function generate_model(sample)
 end
 
 # Compute all combinations of the form θ = (N, d, l, σ, r), r => sample id
-Ns = [1, 2] * 1000;
-ls = [0.5, 1, 2, 3];
-σs = [1, √2];
-rs = 1:400;
-ds = 1:5;
+Ns = 1000; #[1, 2] * 1000;
+ls = 1; #[0.5, 1, 2, 3];
+σs = 1; #[1, √2];
+rs = 1; #1:100;
+ds = 1; #1:5;
 θs = collect(Iterators.product(Ns, ds, ls, σs, rs))[:];
 
 # Set a seed
@@ -86,7 +86,7 @@ ȳh = Dict(
 
 # Arrange the results as dataframes
 df = map([:knn, :blop]) do m
-    DataFrame((θs[i]..., m, ȳt[i], ȳh[m][i]...) for i ∈ 1:length(θs)) |>
+    DataFrame((θs[i]..., m, 0.0, ȳh[m][i]...) for i ∈ 1:length(θs)) |>
     x -> rename!(x, [:N, :d, :l, :o, :r, :m, :target, Symbol.(1:Smax)...]) |>
     x -> stack(x, 8:(7 + Smax), value_name = :estimate, variable_name = :S) |>
     x -> select!(x, All(Not("target"), :)) |>
@@ -100,4 +100,4 @@ df = map([:knn, :blop]) do m
         ((:d .== 5) .& (:S .>  2))
     )
 end;
-CSV.write("data/exp-01.csv", vcat(df...))
+CSV.write("data/exp-02.csv", vcat(df...))
