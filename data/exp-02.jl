@@ -32,7 +32,7 @@ end
 Ns = [1, 2] * 1000;
 ls = [0.5, 1, 2, 3];
 σs = [1, √2];
-rs = 1:100;
+rs = 1:400;
 ds = 1:5;
 θs = collect(Iterators.product(Ns, ds, ls, σs, rs))[:];
 
@@ -42,7 +42,6 @@ Random.seed!(1);
 # For each θ, ...
 samples = [simulate_sample(x[1:4]...) for x ∈ θs]; # create a sample
 models  = [generate_model(x) for x ∈ samples];     # create a model
-means   = [mean(x[1][0])     for x ∈ samples];     # save the true means
 
 # Impute ȳ for each `S` <= `Smax`, given a model (knn)
 @everywhere function ȳknn(model, Smax)
@@ -80,12 +79,12 @@ ȳblop(models[1], 11); # for jit compilation
 # Run the experiments
 Smax = 50;
 ȳh = Dict(
-    :knn => pmap(model -> ȳknn(model, Smax), models),
-    :blop => pmap(model -> ȳblop(model, Smax), models)
+    # :blop => pmap(model -> ȳblop(model, Smax), models),
+    :knn => pmap(model -> ȳknn(model, Smax), models)
 );
 
 # Arrange the results as dataframes
-df = map([:knn, :blop]) do m
+df = map([:knn]) do m
     DataFrame((θs[i]..., m, 0.0, ȳh[m][i]...) for i ∈ 1:length(θs)) |>
     x -> rename!(x, [:N, :d, :l, :o, :r, :m, :target, Symbol.(1:Smax)...]) |>
     x -> stack(x, 8:(7 + Smax), value_name = :estimate, variable_name = :S) |>
