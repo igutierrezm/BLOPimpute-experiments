@@ -79,12 +79,12 @@ ȳblop(models[1], 11); # for jit compilation
 # Run the experiments
 Smax = 50;
 ȳh = Dict(
-    # :blop => pmap(model -> ȳblop(model, Smax), models),
+    :blop => pmap(model -> ȳblop(model, Smax), models),
     :knn => pmap(model -> ȳknn(model, Smax), models)
 );
 
 # Arrange the results as dataframes
-df = map([:knn]) do m
+df = map([:knn, :blop]) do m
     DataFrame((θs[i]..., m, ȳh[m][i]...) for i ∈ 1:length(θs)) |>
     x -> rename!(x, [:N, :d, :l, :o, :r, :m, Symbol.(1:Smax)...]) |>
     x -> stack(x, 7:(6 + Smax), value_name = :estimate, variable_name = :S) |>
