@@ -9,7 +9,7 @@ nworkers() == 8 || addprocs(8, exeflags = "--project")
 # Simulate a sample of size N from the DGP determined by (d, l, σ)
 function simulate_sample(N, d, l, σ)
     K = [2, 4, 6, 10, 2]
-    X = -log.(Random.rand(K[d], N))
+    X = Random.randn(K[d], N)
     y = σ * Random.randn(N)
     for j ∈ 1:K[d]
         @. y += X[j, :] * (-1)^(j - 1)
@@ -91,7 +91,7 @@ df = map([:knn]) do m
     x -> @linq x |>
     transform(
         S = levelcode.(:S), 
-        target = - Float64.(:d .== 5)
+        target = 0.0
     ) |>
     where(
         ((:d .== 1) .& (:S .>  2)) .|
