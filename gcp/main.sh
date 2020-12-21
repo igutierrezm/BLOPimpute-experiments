@@ -68,3 +68,6 @@ gcloud beta compute \
 
 # # Add user (master) and password (123)
 # useradd -p $(openssl passwd -crypt 123) master
+
+####
+# ssh-keygen -R "you server hostname or ip"
