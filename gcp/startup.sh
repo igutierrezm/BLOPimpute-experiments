@@ -9,13 +9,12 @@ sudo apt --assume-yes install default-jre=2:1.11-72
 # Install CPLEX 12.10
 gsutil cp gs://cplex-1210/cplex-1210.bin cplex.bin
 chmod +x cplex.bin
-CPLEX_DIR="/opt"
 sudo ./cplex.bin \
     -i silent \
     -DINSTALLER_UI=silent \
     -DLICENSE_ACCEPTED=TRUE \
-    -DUSER_INSTALL_DIR=${CPLEX_DIR}
-export CPLEX_STUDIO_BINARIES="${CPLEX_DIR}/cplex/bin/x86-64_linux/"
+    -DUSER_INSTALL_DIR="/opt"
+export CPLEX_STUDIO_BINARIES="/opt/cplex/bin/x86-64_linux/"
 rm -rf cplex.bin
 
 # Install Julia 1.5.3
@@ -29,14 +28,13 @@ sudo apt --assume-yes autoremove -f
 rm -rf julia-1.5.3*
 
 # Run experiment
-echo "a" >> a.txt
-# git clone https://github.com/igutierrezm/BLOPimpute-experiments.git
-# cd BLOPimpute-experiments
-# julia -e 'using Pkg; Pkg.activate("."); Pkg.instantiate(); Pkg.build("CPLEX")'
-# julia data/exp-${ID}.jl
+git clone https://github.com/igutierrezm/BLOPimpute-experiments.git
+cd BLOPimpute-experiments
+julia -e 'using Pkg; Pkg.activate("."); Pkg.instantiate();'
+julia data/exp-${ID}.jl
 
-# # Save results
-# gsutil cp data/exp-${ID}.csv gs://blopimpute
+# Save results
+gsutil cp data/exp-${ID}.csv gs://blopimpute
 
 # # Delete VM
 # gcloud compute instances delete blopimpute --zone us-central1-a --quiet
