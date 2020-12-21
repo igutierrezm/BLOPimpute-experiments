@@ -8,7 +8,7 @@ gcloud beta compute \
     --maintenance-policy=MIGRATE \
     --service-account=906931621342-compute@developer.gserviceaccount.com \
     --scopes=https://www.googleapis.com/auth/cloud-platform \
-    --image=ubuntu-2010-groovy-v20201111 \
+    --image=ubuntu-2010-groovy-v20201210 \
     --image-project=ubuntu-os-cloud \
     --boot-disk-size=200GB \
     --boot-disk-type=pd-standard \
