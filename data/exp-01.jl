@@ -9,7 +9,7 @@ nworkers() == 8 || addprocs(8, exeflags = "--project")
 # Simulate a sample of size N from the DGP determined by (d, l, σ)
 function simulate_sample(N, d, l, σ)
     K = [2, 4, 6, 10, 2]
-    X = -log.(Random.rand(K[d], N)) # re-evaluate
+    X = Random.rand(K[d], N)
     y = σ * Random.randn(N)
     for j ∈ 1:K[d]
         @. y += X[j, :] * (-1)^(j - 1)
@@ -25,11 +25,16 @@ end
 # Generate a imputation problem from a sample
 function generate_model(sample)
     y, X = sample
-    return BLOPimpute.Model(; y = y, X = X, optimizer = CPLEX.Optimizer)
+    return BLOPimpute.Model(; 
+        y = y, 
+        X = X, 
+        leafsize = size(X[1], 2),
+        optimizer = CPLEX.Optimizer
+    )
 end
 
 # Compute all combinations of the form θ = (N, d, l, σ, r), r => sample id
-Ns = [1, 2] * 1000;
+Ns = [1, 5, 10, 20] * 100;
 ls = [0.5, 1, 2, 3];
 σs = [1, √2];
 rs = 1:400;
@@ -42,7 +47,6 @@ Random.seed!(1);
 # For each θ, ...
 samples = [simulate_sample(x[1:4]...) for x ∈ θs]; # create a sample
 models  = [generate_model(x) for x ∈ samples];     # create a model
-means   = [mean(x[1][0])     for x ∈ samples];     # save the true means
 
 # Impute ȳ for each `S` <= `Smax`, given a model (knn)
 @everywhere function ȳknn(model, Smax)
@@ -50,7 +54,7 @@ means   = [mean(x[1][0])     for x ∈ samples];     # save the true means
     X = model.X
     ŷb = zeros(Smax)
     K, N0 = size(X[0])
-    kdtree = KDTree(X[1]; leafsize = 100)
+    kdtree = KDTree(X[1]; leafsize = size(X[1], 2))
     for S ∈ K+1:Smax
         for i ∈ 1:N0
             ν = knn(kdtree, X[0][:, i], S)[1]
@@ -86,12 +90,11 @@ ȳh = Dict(
 
 # Arrange the results as dataframes
 df = map([:knn, :blop]) do m
-    DataFrame((θs[i]..., m, ȳt[i], ȳh[m][i]...) for i ∈ 1:length(θs)) |>
-    x -> rename!(x, [:N, :d, :l, :o, :r, :m, :target, Symbol.(1:Smax)...]) |>
-    x -> stack(x, 8:(7 + Smax), value_name = :estimate, variable_name = :S) |>
-    x -> select!(x, All(Not("target"), :)) |>
+    DataFrame((θs[i]..., m, ȳh[m][i]...) for i ∈ 1:length(θs)) |>
+    x -> rename!(x, [:N, :d, :l, :o, :r, :m, Symbol.(1:Smax)...]) |>
+    x -> stack(x, 7:(6 + Smax), value_name = :estimate, variable_name = :S) |>
     x -> @linq x |>
-    transform(S = levelcode.(:S)) |>
+    transform(S = levelcode.(:S), target = 0.0) |>
     where(
         ((:d .== 1) .& (:S .>  2)) .|
         ((:d .== 2) .& (:S .>  4)) .|
