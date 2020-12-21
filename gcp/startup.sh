@@ -30,8 +30,8 @@ rm -rf julia-1.5.3*
 
 # Run experiment
 git clone https://github.com/igutierrezm/BLOPimpute-experiments.git
-cd BLOPimpute-experiments
-julia 'using Pkg; Pkg.activate("."); Pkg.instantiate(); Pkg.build("CPLEX")'
+# cd BLOPimpute-experiments
+# julia 'using Pkg; Pkg.activate("."); Pkg.instantiate(); Pkg.build("CPLEX")'
 # julia data/exp-${ID}.jl
 
 # # Save results
