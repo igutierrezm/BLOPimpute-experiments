@@ -1,8 +1,5 @@
 # Load all relevant packages
-using Pkg
-Pkg.activate(".")
-Pkg.instantiate()
-Pkg.build("CPLEX")
+using Pkg; Pkg.activate(".")
 using CPLEX, CSV, DataFrames, Distributed, OffsetArrays, Random, DataFramesMeta
 nworkers() == 8 || addprocs(8, exeflags = "--project")
 @everywhere using BLOPimpute, CPLEX, NearestNeighbors
