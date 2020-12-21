@@ -36,5 +36,5 @@ julia data/exp-${ID}.jl
 # Save results
 gsutil cp data/exp-${ID}.csv gs://blopimpute
 
-# # Delete VM
-# gcloud compute instances delete blopimpute --zone us-central1-a --quiet
+# Delete VM
+gcloud compute instances delete blopimpute --zone us-central1-a --quiet
