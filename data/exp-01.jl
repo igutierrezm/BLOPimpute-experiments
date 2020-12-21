@@ -2,6 +2,7 @@
 using Pkg
 Pkg.activate(".")
 Pkg.instantiate()
+Pkg.build("CPLEX")
 using CPLEX, CSV, DataFrames, Distributed, OffsetArrays, Random, DataFramesMeta
 nworkers() == 8 || addprocs(8, exeflags = "--project")
 @everywhere using BLOPimpute, CPLEX, NearestNeighbors
@@ -37,7 +38,7 @@ end
 Ns = [1, 5, 10, 20] * 100;
 ls = [0.5, 1, 2, 3];
 σs = [1, √2];
-rs = 1:400;
+rs = 1:2;
 ds = 1:5;
 θs = collect(Iterators.product(Ns, ds, ls, σs, rs))[:];
 
@@ -82,7 +83,7 @@ end
 ȳblop(models[1], 11); # for jit compilation
 
 # Run the experiments
-Smax = 50;
+Smax = 2;
 ȳh = Dict(
     :knn => pmap(model -> ȳknn(model, Smax), models),
     :blop => pmap(model -> ȳblop(model, Smax), models)
