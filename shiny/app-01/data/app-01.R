@@ -2,7 +2,7 @@
 library(readr)
 library(dplyr)
 readr::read_csv("data/exp-01.csv") %>%
-    dplyr::filter(!is.infinite(estimate)) %>%
+    dplyr::filter(!is.infinite(estimate), m == "blop") %>%
     dplyr::group_by(N, d, l, o, m, S) %>%
     dplyr::summarise(mspe = mean((estimate - target)^2)) %>%
     dplyr::rename(method = m) %>%

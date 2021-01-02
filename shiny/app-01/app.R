@@ -62,7 +62,7 @@ plot01 <- function(df, .N, .d) {
     p <- 
         dplyr::filter(df, N == .N, d == .d) %>%
         ggplot(aes(x = S, y = mspe, color = method)) + 
-        facet_grid(o ~ l, labeller = "label_both") +
+        facet_wrap(o ~ l, labeller = "label_both", scales = "free_y") +
         geom_line()
      ggplotly(p) %>% 
         config(mathjax = 'cdn')
@@ -73,8 +73,8 @@ ui <- fluidPage(
     titlePanel("My Shiny App"),
     sidebarLayout(
         sidebarPanel(
-            selectInput("N", "Choose the sample size", c(1000, 2000), 1000),
-            selectInput("dgp", "Choose the DGP",  c(1:5), 1),
+            selectInput("N", "Choose the sample size", c(500, 1000), 1000),
+            selectInput("dgp", "Choose the DGP",  c(1:4), 1),
         ),
         
         mainPanel(
