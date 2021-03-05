@@ -35,7 +35,7 @@ end
 Ns = [5, 10] * 100;
 ls = [3, 7] / 4;
 σs = [1, √2];
-rs = 1:1000;
+rs = 1:100;
 ds = 1:4;
 θs = collect(Iterators.product(Ns, ds, ls, σs, rs))[:];
 
@@ -92,7 +92,7 @@ df = map([:knn, :blop]) do m
     x -> rename!(x, [:N, :d, :l, :o, :r, :m, Symbol.(1:Smax)...]) |>
     x -> stack(x, 7:(6 + Smax), value_name = :estimate, variable_name = :S) |>
     x -> @linq x |>
-    transform(S = levelcode.(:S), target = 0.0) |>
+    transform(S = parse.(Ref(Int), :S), target = 0.0) |>
     where(
         ((:d .== 1) .& (:S .>  2)) .|
         ((:d .== 2) .& (:S .>  6)) .|
