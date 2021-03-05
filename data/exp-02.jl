@@ -32,7 +32,7 @@ function generate_model(sample)
 end
 
 # Compute all combinations of the form θ = (N, d, l, σ, r), r => sample id
-Ns = [5] * 100;
+Ns = [5, 10] * 100;
 ls = [3, 7] / 4;
 σs = [1, √2];
 rs = 1:100;
@@ -47,21 +47,7 @@ samples = [simulate_sample(x[1:4]...) for x ∈ θs]; # create a sample
 models  = [generate_model(x) for x ∈ samples];     # create a model
 
 # Impute ȳ for each `S` <= `Smax`, given a model (blop)
-scorefun(x, y) = sum((x - y).^2)
-@everywhere function ȳblopS(model)
-    ŷb = 0.0
-    try
-        model.S̄[1] = select_s_naive(model, 20 .* (1:5), scorefun; nruns = 10)
-        ŷb = mean(impute!(model))
-    catch
-        ŷb = Inf
-    end
-    return ŷb
-end
-ȳblopS(models[1]) # for jit compilation
-
-# Impute ȳ for each `S` <= `Smax`, given a model (blop)
-@everywhere function ȳblopN(model)
+@everywhere function ȳblopSmax(model)
     ŷb = 0.0
     try
         model.S̄[1] = size(model.X[1], 2)
@@ -71,29 +57,20 @@ ȳblopS(models[1]) # for jit compilation
     end
     return ŷb
 end
-ȳblopN(models[1]) # for jit compilation
+ȳblopSmax(models[1]) # for jit compilation
 
 # Run the experiments
-ȳh = Dict(
-    :knn => pmap(model -> ȳknnS(model), models),
-    :blop => pmap(model -> ȳblopN(model), models)
-);
+ȳh = Dict(:Smax => pmap(model -> ȳblopSmax(model), models));
 
 # Arrange the results as dataframes
-df = map([:knn, :blop]) do m
+df = map([:S100, :Smax]) do m
     DataFrame((θs[i]..., m, ȳh[m][i]...) for i ∈ 1:length(θs)) |>
-    x -> rename!(x, [:N, :d, :l, :o, :r, :m, Symbol.(1:Smax)...]) |>
-    x -> stack(x, 7:(6 + Smax), value_name = :estimate, variable_name = :S) |>
+    x -> rename!(x, [:N, :d, :l, :o, :r, :m, :estimate]) |>
     x -> @linq x |>
-    transform(S = parse.(Ref(Int), :S), target = 0.0) |>
-    where(
-        ((:d .== 1) .& (:S .>  2)) .|
-        ((:d .== 2) .& (:S .>  6)) .|
-        ((:d .== 3) .& (:S .> 10)) .|
-        ((:d .== 4) .& (:S .>  2))
-    )
+        DataframesMeta.transform(target = 0.0)
 end;
-CSV.write("data/exp-01.csv", vcat(df...))
+df
+CSV.write("data/exp-02.csv", vcat(df[2]))
 
 # for l ∈ ls
 #     y, x = simulate_sample(1000000, 1, l, 1)
