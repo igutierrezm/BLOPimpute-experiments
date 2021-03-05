@@ -1,4 +1,4 @@
-exp_01 <- read_csv("data/exp-01.csv")
+exp_01 <- readr::read_csv("data/exp-01.csv")
 p <- 
     exp_01 %>%
     dplyr::rename(method = m) %>%
@@ -13,5 +13,5 @@ p <-
         panel.grid.major = ggplot2::element_blank(), 
         panel.grid.minor = ggplot2::element_blank()
     )
-ggplot2::ggsave("images/exp-1.pdf", p, width = 6, height = 5)
+ggplot2::ggsave("images/exp-01.pdf", p, width = 6, height = 5)
 p
