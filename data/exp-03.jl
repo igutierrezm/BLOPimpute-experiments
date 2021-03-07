@@ -51,7 +51,7 @@ models  = [generate_model(x) for x ∈ samples];     # create a model
 @everywhere function ȳblopS(model)
     ŷb = 0.0
     try
-        model.S̄[1] = select_s_naive(model, 20 .* (1:5), scorefun; nruns = 10)
+        model.S̄[1] = select_s_naive(model, (size(model.X[1], 1) + 1):50, scorefun; nruns = 10)
         ŷb = mean(impute!(model))
     catch
         ŷb = Inf
@@ -60,27 +60,11 @@ models  = [generate_model(x) for x ∈ samples];     # create a model
 end
 ȳblopS(models[1]) # for jit compilation
 
-# Impute ȳ for each `S` <= `Smax`, given a model (blop)
-@everywhere function ȳblopN(model)
-    ŷb = 0.0
-    try
-        model.S̄[1] = size(model.X[1], 2)
-        ŷb = mean(impute!(model))
-    catch
-        ŷb = Inf
-    end
-    return ŷb
-end
-ȳblopN(models[1]) # for jit compilation
-
 # Run the experiments
-ȳh = Dict(
-    :Sfit => pmap(model -> ȳblopS(model), models),
-    :Smax => pmap(model -> ȳblopN(model), models)
-);
+ȳh = Dict(:Sfit => pmap(model -> ȳblopS(model), models));
 
 # Arrange the results as dataframes
-df = map([:Sfit, :Smax]) do m
+df = map([:Sfit]) do m
     DataFrame((θs[i]..., m, ȳh[m][i]...) for i ∈ 1:length(θs)) |>
     x -> rename!(x, [:N, :d, :l, :o, :r, :m, :estimate]) |>
     x -> @linq x |>
