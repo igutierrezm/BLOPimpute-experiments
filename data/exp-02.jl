@@ -1,6 +1,6 @@
 # Load all relevant packages
 using Pkg; Pkg.activate(".")
-using CPLEX, CSV, DataFrames, Distributed, OffsetArrays, Random, DataFramesMeta
+using CPLEX, CSV, DataFrames, Distributed, OffsetArrays, Random
 nworkers() == 8 || addprocs(8, exeflags = "--project")
 @everywhere using BLOPimpute, CPLEX, NearestNeighbors
 
@@ -35,7 +35,7 @@ end
 Ns = [5, 10] * 100;
 ls = [3, 7] / 4;
 σs = [1, √2];
-rs = 1:100;
+rs = 1:400;
 ds = 1:4;
 θs = collect(Iterators.product(Ns, ds, ls, σs, rs))[:];
 
@@ -66,11 +66,10 @@ ȳh = Dict(:Smax => pmap(model -> ȳblopSmax(model), models));
 df = map([:Smax]) do m
     DataFrame((θs[i]..., m, ȳh[m][i]...) for i ∈ 1:length(θs)) |>
     x -> rename!(x, [:N, :d, :l, :o, :r, :m, :estimate]) |>
-    x -> @linq x |>
-        DataframesMeta.transform(target = 0.0)
+    x -> transform(x, [] => (() -> 0.0) => :target)
 end;
-df
-CSV.write("data/exp-02.csv", vcat(df[2]))
+vcat(df)
+CSV.write("data/exp-02.csv", vcat(df))
 
 # for l ∈ ls
 #     y, x = simulate_sample(1000000, 1, l, 1)
