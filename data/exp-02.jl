@@ -63,7 +63,7 @@ ȳblopSmax(models[1]) # for jit compilation
 ȳh = Dict(:Smax => pmap(model -> ȳblopSmax(model), models));
 
 # Arrange the results as dataframes
-df = map([:S100, :Smax]) do m
+df = map([:Smax]) do m
     DataFrame((θs[i]..., m, ȳh[m][i]...) for i ∈ 1:length(θs)) |>
     x -> rename!(x, [:N, :d, :l, :o, :r, :m, :estimate]) |>
     x -> @linq x |>
