@@ -10,7 +10,7 @@ exp_03a <-
 exp_03b <- 
     readr::read_csv("data/exp-03.csv") %>%
     dplyr::filter(l == 1.75, o == sqrt(2), !is.infinite(estimate)) %>%
-    dplyr::mutate(m = "BLOP (fiited S)") %>%
+    dplyr::mutate(m = "BLOP (fitted S)") %>%
     dplyr::group_by(m, d, N) %>%
     dplyr::summarise(mse = f(estimate, target), .groups = "drop")
 
