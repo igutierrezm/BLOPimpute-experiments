@@ -3,14 +3,14 @@ f <- function (x, y) mean((x - y)^2)
 exp_03a <- 
     readr::read_csv("data/exp-02.csv") %>%
     dplyr::filter(l == 1.75, o == sqrt(2), !is.infinite(estimate)) %>%
-    dplyr::mutate(m = "BLOP (max S)") %>%
+    dplyr::mutate(m = "blop (max S)") %>%
     dplyr::group_by(m, d, N) %>%
     dplyr::summarise(mse = f(estimate, target), .groups = "drop")
 
 exp_03b <- 
     readr::read_csv("data/exp-03.csv") %>%
     dplyr::filter(l == 1.75, o == sqrt(2), !is.infinite(estimate)) %>%
-    dplyr::mutate(m = "BLOP (fitted S)") %>%
+    dplyr::mutate(m = "blop (fitted S)") %>%
     dplyr::group_by(m, d, N) %>%
     dplyr::summarise(mse = f(estimate, target), .groups = "drop")
 
