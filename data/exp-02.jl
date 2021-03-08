@@ -68,5 +68,5 @@ df = map([:Smax]) do m
     x -> rename!(x, [:N, :d, :l, :o, :r, :m, :estimate]) |>
     x -> transform(x, [] => (() -> 0.0) => :target)
 end;
-vcat(df)
-CSV.write("data/exp-02.csv", vcat(df))
+vcat(df...)
+CSV.write("data/exp-02.csv", vcat(df...))
