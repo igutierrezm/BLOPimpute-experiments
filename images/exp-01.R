@@ -3,7 +3,7 @@ exp_01 <- readr::read_csv("data/exp-01.csv")
 p <- 
     exp_01 %>%
     dplyr::rename(method = m) %>%
-    dplyr::filter(l == 0.75, o == 1, !is.infinite(estimate)) %>%
+    dplyr::filter(l == 1.75, o == sqrt(2), !is.infinite(estimate)) %>%
     dplyr::group_by(method, d, N, S) %>%
     dplyr::summarise(mse = mean((estimate - target)^2), .groups = "drop") %>%
     ggplot2::ggplot(ggplot2::aes(x = S, y = mse, color = method)) + 

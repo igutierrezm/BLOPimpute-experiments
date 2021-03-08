@@ -2,13 +2,13 @@ library(magrittr)
 f <- function (x, y) mean((x - y)^2)
 exp_02a <- 
     readr::read_csv("data/exp-01.csv") %>%
-    dplyr::filter(l == 0.75, o == 1, !is.infinite(estimate), m == "blop") %>%
+    dplyr::filter(l == 1.75, o == sqrt(2), !is.infinite(estimate), m == "blop") %>%
     dplyr::group_by(d, N, S) %>%
     dplyr::summarise(`BLOP (fixed S)` = f(estimate, target), .groups = "drop")
     
 exp_02b <- 
     readr::read_csv("data/exp-02.csv") %>%
-    dplyr::filter(l == 0.75, o == 1, !is.infinite(estimate)) %>%
+    dplyr::filter(l == 1.75, o == sqrt(2), !is.infinite(estimate)) %>%
     dplyr::group_by(d, N) %>%
     dplyr::summarise(`BLOP (max S)` = f(estimate, target), .groups = "drop")
 
