@@ -35,7 +35,7 @@ end
 Ns = [5, 10] * 100;
 ls = [3, 7] / 4;
 σs = [1, √2];
-rs = 1:100;
+rs = 1:400;
 ds = 1:4;
 θs = collect(Iterators.product(Ns, ds, ls, σs, rs))[:];
 
@@ -67,19 +67,7 @@ ȳh = Dict(:Sfit => pmap(model -> ȳblopS(model), models));
 df = map([:Sfit]) do m
     DataFrame((θs[i]..., m, ȳh[m][i]...) for i ∈ 1:length(θs)) |>
     x -> rename!(x, [:N, :d, :l, :o, :r, :m, :estimate]) |>
-    x -> @linq x |>
-        transform(target = 0.0)
+    x -> transform(x, [] => (() -> 0.0) => :target)
 end;
 df
 CSV.write("data/exp-03.csv", vcat(df...))
-
-# for l ∈ ls
-#     y, x = simulate_sample(1000000, 1, l, 1)
-#     println(length(y[0]) / sum(length.(y)))
-# end
-
-# Try this (later)
-# df = DataFrame(a = [0, 0, 1, 1], b = [2, 4, 0, 1])
-# filter(df) do row 
-#     row.a > 0 && row.b >= 2
-# end

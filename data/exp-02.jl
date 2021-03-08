@@ -70,14 +70,3 @@ df = map([:Smax]) do m
 end;
 vcat(df)
 CSV.write("data/exp-02.csv", vcat(df))
-
-# for l ∈ ls
-#     y, x = simulate_sample(1000000, 1, l, 1)
-#     println(length(y[0]) / sum(length.(y)))
-# end
-
-# Try this (later)
-# df = DataFrame(a = [0, 0, 1, 1], b = [2, 4, 0, 1])
-# filter(df) do row 
-#     row.a > 0 && row.b >= 2
-# end
