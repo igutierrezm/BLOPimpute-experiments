@@ -1,6 +1,6 @@
 #! /bin/bash
 # Run data/exp-${ID}.jl and save the produced csv file in gs://blopimpute
-ID="03"
+ID="02"
 
 # Install JRE 2:1.11-72
 sudo apt update
