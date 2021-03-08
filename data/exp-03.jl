@@ -35,7 +35,7 @@ end
 Ns = [5, 10] * 100;
 ls = [3, 7] / 4;
 σs = [1, √2];
-rs = 1:2;
+rs = 1:400;
 ds = 1:4;
 θs = collect(Iterators.product(Ns, ds, ls, σs, rs))[:];
 
