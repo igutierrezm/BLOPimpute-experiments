@@ -29,9 +29,6 @@ p <-
         panel.grid.major = ggplot2::element_blank(), 
         panel.grid.minor = ggplot2::element_blank(),
         legend.position  = "top"
-    ) +
-    ggplot2::labs(
-        fill = "S"
     )
 ggplot2::ggsave("images/exp-03.pdf", p, width = 6, height = 3)
 p
