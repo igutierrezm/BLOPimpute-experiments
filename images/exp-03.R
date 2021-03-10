@@ -10,12 +10,19 @@ exp_03a <-
 exp_03b <- 
     readr::read_csv("data/exp-03.csv") %>%
     dplyr::filter(l == 1.75, o == sqrt(2), !is.infinite(estimate)) %>%
-    dplyr::mutate(m = "blop (fitted S)") %>%
+    dplyr::mutate(m = "blop (fitted S, naive method)") %>%
+    dplyr::group_by(m, d, N) %>%
+    dplyr::summarise(mse = f(estimate, target), .groups = "drop")
+
+exp_03c <- 
+    readr::read_csv("data/exp-04.csv") %>%
+    dplyr::filter(l == 1.75, o == sqrt(2), !is.infinite(estimate)) %>%
+    dplyr::mutate(m = "blop (fitted S, improved method)") %>%
     dplyr::group_by(m, d, N) %>%
     dplyr::summarise(mse = f(estimate, target), .groups = "drop")
 
 exp_03 <-
-    rbind(exp_03a, exp_03b) %>%
+    rbind(exp_03a, exp_03b, exp_03c) %>%
     dplyr::rename(method = m)
 
 p <- 
@@ -27,8 +34,7 @@ p <-
     ggplot2::scale_fill_grey() + 
     ggplot2::theme(
         panel.grid.major = ggplot2::element_blank(), 
-        panel.grid.minor = ggplot2::element_blank(),
-        legend.position  = "top"
+        panel.grid.minor = ggplot2::element_blank()
     )
 ggplot2::ggsave("images/exp-03.pdf", p, width = 6, height = 3)
 p
